@@ -1,0 +1,28 @@
+---
+- name: Demonstrate Loop variable
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+
+    - name: Register loop output as a variable
+      ansible.builtin.shell: "echo {{ item }}"
+      loop:
+        - "one"
+        - "two"
+      register: echo
+
+    - name: Fail if return code is not 0
+      ansible.builtin.fail:
+        msg: "The command ({{ item.cmd }}) has non zero rc"
+      when: item.rc != 0
+      loop: "{{ echo.results }}"
+
+    - name: Place result of current item in variable
+      ansible.builtin.shell: echo "{{ item }}"
+      loop:
+        - one
+        - two
+      register: echo
+      changed_when: echo.stdout != "one"
+...
